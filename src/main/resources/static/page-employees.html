@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Все записи из Employee</title>
+</head>
+<!-- Блок со списком сотрудников -->
+<h3>Все записи из Employee</h3>
+
+<!-- Таблица, куда будут вставляться данные -->
+<table id="employeesTable" border="1" style="display: none;">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>ФИО</th>
+        <th>Статус</th>
+        <th>Дата добавления записи</th>
+    </tr>
+    </thead>
+    <tbody id="tableBody">
+    <!-- Сюда JS вставит строки -->
+    </tbody>
+</table>
+
+<!-- Сообщение, если список пуст -->
+<div id="emptyMessage" style="display: none;">
+    <p>Сотрудников пока нет.</p>
+</div>
+
+<script>
+    window.onload = function() {
+        loadEmployees();
+    };
+
+    async function loadEmployees() {
+        try {
+            const response = await fetch('http://localhost:8080/api/employees/all');
+
+            if (!response.ok) {
+                throw new Error('Ошибка сервера: ' + response.status);
+            }
+
+            const employees = await response.json();
+
+            const table = document.getElementById('employeesTable');
+            const tbody = document.getElementById('tableBody');
+            const emptyMessage = document.getElementById('emptyMessage');
+
+            tbody.innerHTML = '';
+
+            if (employees.length === 0) {
+                table.style.display = 'none';
+                emptyMessage.style.display = 'block';
+                return;
+            }
+
+            table.style.display = 'table';
+            emptyMessage.style.display = 'none';
+
+            employees.forEach(emp => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${emp.employeeId}</td>
+                    <td>${emp.fullName}</td>
+                    <td>${emp.workStatus}</td>
+                    <td>${emp.addDate}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+        } catch (error) {
+            console.error("Ошибка:", error);
+            document.getElementById('emptyMessage').innerHTML =
+                "<p style='color:red;'>Ошибка загрузки данных.</p>";
+            document.getElementById('emptyMessage').style.display = 'block';
+        }
+    }
+</script>
+<a href="/">Назад на главную</a>
+</body>
+</html>
